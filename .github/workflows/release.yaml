@@ -10,6 +10,9 @@ on:
 env:
   REDIS_IMAGE_NAME: "cgr.dev/cgr-demo.com/redis-server-bitnami"
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     if: github.ref == 'refs/heads/main'
@@ -21,8 +24,13 @@ jobs:
       packages: write      
       id-token: write
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@v2.11.0
+        with:
+          egress-policy: audit
+
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
         with:
           ref: main
 
@@ -32,9 +40,9 @@ jobs:
           cache: false
       
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
       
-      - uses: chainguard-dev/setup-chainctl@v0.2.4
+      - uses: chainguard-dev/setup-chainctl@8d93dcbef466d3cf3533f67084f52eb74ef9d262 # v0.2.4
         with:
           identity: "4cf15780a13a9b6576d8b357e6524554c8c12a18/a662f56b58103354"
         
@@ -42,7 +50,7 @@ jobs:
         run: |
           chainctl auth configure-docker
     
-      - uses: azure/setup-helm@v4.2.0
+      - uses: azure/setup-helm@fe7b79cd5ee1e45176fcad797de68ecaf3ca4814 # v4.2.0
         id: install
 
       - name: Extract unique image.tag value
@@ -72,7 +80,7 @@ jobs:
           helm repo update
   
       - name: Create k8s Kind Cluster
-        uses: helm/kind-action@v1
+        uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
         with:
           cluster_name: kind-smoke-test
   
