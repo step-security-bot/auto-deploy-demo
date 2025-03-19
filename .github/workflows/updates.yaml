@@ -10,6 +10,9 @@ env:
   SCAN_WITH_GRYPE: "true"
   SCAN_WITH_PRISMA_CLOUD: "true"
   
+permissions:
+  contents: read
+
 jobs:
   check-for-fixes:
     runs-on: ubuntu-latest
@@ -20,6 +23,11 @@ jobs:
       packages: write
       id-token: write
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
